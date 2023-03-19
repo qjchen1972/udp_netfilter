@@ -1,0 +1,29 @@
+#!/bin/sh
+
+intip=10.46.171.147
+intmask=255.255.248.0
+intdev=eth0
+extip=101.201.210.176
+extmask=255.255.252.0
+extdev=eth1
+gatemac=00:00:5e:00:01:01
+maxuser=6
+dir=`pwd`
+cd $dir
+
+depmod $dir/forward.ko
+
+dmesg -c
+modprobe forward net=$intip:$intmask:$intdev:$extip:$extmask:$extdev:$gatemac:$maxuser
+
+major=`dmesg  | grep major | awk '{print $5}'`
+if [ ! -n "$major" ]; then
+major=`dmesg  | grep major | awk '{print $4}'`
+
+minor=`dmesg   | grep minor | awk '{print $4}'`
+else
+
+minor=`dmesg   | grep minor | awk '{print $5}'`
+fi
+
+mknod /dev/FWD c  $major  $minor
